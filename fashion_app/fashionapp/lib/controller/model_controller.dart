@@ -8,6 +8,41 @@ class ColorRecommendationProvider with ChangeNotifier {
   XFile? image;
   Map<String, dynamic>? colorRecommendation;
   bool isLoading = false;
+
+  Future<void> optionPickImage(BuildContext context) async {
+    final pickedFile = await showDialog<XFile?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Center(child: Text('Pick an Image')),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                final image = await ImagePicker().pickImage(source: ImageSource.camera);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop(image);
+              },
+              child: Text('Camera'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop(image);
+              },
+              child: Text('Gallery'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (pickedFile != null) {
+      image = pickedFile;
+      notifyListeners();
+    }
+  }
+
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -16,6 +51,20 @@ class ColorRecommendationProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<void> pickImageCamera() async {
+    try {
+      final pickerCamera = ImagePicker();
+      final pickedFile = await pickerCamera.pickImage(source: ImageSource.camera);
+      if (pickedFile != null) {
+          image = pickedFile;
+        notifyListeners();
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print("Error picking image from camera: $e");
+    }
+  }
+
   Future<void> submitImage() async {
     if (image != null) {
       isLoading = true;
@@ -30,9 +79,11 @@ class ColorRecommendationProvider with ChangeNotifier {
           final res = await http.Response.fromStream(response);
           colorRecommendation = jsonDecode(res.body);
         } else {
+          // ignore: avoid_print
           print('Failed to load recommendations');
         }
       } catch (e) {
+        // ignore: avoid_print
         print('Error occurred: $e');
       }
       isLoading = false;

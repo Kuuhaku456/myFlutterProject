@@ -30,13 +30,22 @@ class HomePage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
+              provider.pickImageCamera();
+            },
+            icon: const Icon(
+              Icons.camera_alt,
+              size: 40,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
               provider.resetData();
             },
             icon: const Icon(
               Icons.refresh,
               size: 40,
             ),
-          )
+          ),
         ],
       ),
       body: Padding(
